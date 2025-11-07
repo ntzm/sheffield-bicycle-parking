@@ -102,12 +102,12 @@ fs.writeFileSync(
 						addProp("Capacity", p.capacity);
 					}
 
-					if (p.website) {
-						addProp("Website", p.website);
-					}
-
 					if (p.operator) {
 						addProp("Operated by", p.operator);
+					}
+
+					if (p.website) {
+						lines.push(`**[[${p.website}|Website]]**`);
 					}
 
 					if (p.panoramax) {

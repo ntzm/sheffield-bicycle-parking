@@ -3,7 +3,7 @@ import fs from "fs";
 const overpassQuery = `
 [out:json][timeout:25];
 area(id:3600106956)->.searchArea;
-nwr["bicycle_parking"](area.searchArea);
+nwr["amenity"="bicycle_parking"](area.searchArea);
 out center;
 `;
 

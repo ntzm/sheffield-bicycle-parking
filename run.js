@@ -33,6 +33,11 @@ const accessMap = {
 	private: "Private",
 };
 
+const privateMap = {
+	students: "Students only",
+	employees: "Employees only",
+};
+
 const hangarOperators = ["Falco", "Cyclehoop"];
 
 const bicycleParkingImplicitCovered = ["shed", "building"];
@@ -76,8 +81,10 @@ fs.writeFileSync(
 					const access = accessMap[p.access];
 
 					if (access) {
-						if (p.private === "students") {
-							addProp("Access", "Students only");
+						const privateValue = privateMap[p.private];
+
+						if (privateValue) {
+							addProp("Access", privateValue);
 						} else {
 							addProp("Access", access);
 						}

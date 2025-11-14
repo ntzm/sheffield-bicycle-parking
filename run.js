@@ -1,6 +1,7 @@
 import fs from "fs";
 
-const mapcompleteLayerUri = 'https://studio.mapcomplete.org/12363857/layers/sheffield_cycle_parking/sheffield_cycle_parking.json'
+const mapcompleteLayerUri =
+	"https://studio.mapcomplete.org/12363857/layers/sheffield_cycle_parking/sheffield_cycle_parking.json";
 
 const overpassQuery = `
 [out:json][timeout:25];
@@ -50,12 +51,12 @@ fs.writeFileSync(
 		type: "FeatureCollection",
 		features: (
 			await Promise.all(
-				parking.elements.map(async (f) => {
-					const type = f.type
-					const id = f.id
-					const p = f.tags;
+				parking.elements.map(async (element) => {
+					const type = element.type;
+					const id = element.id;
+					const tags = element.tags;
 
-					const { lat, lon } = f.center ?? f;
+					const { lat, lon } = element.center ?? element;
 
 					const lines = [];
 
@@ -64,33 +65,33 @@ fs.writeFileSync(
 					}
 
 					const is_hub =
-						p.bicycle_parking === "building" && p.access !== "private";
-					const is_hangar = hangarOperators.includes(p.operator);
+						tags.bicycle_parking === "building" && tags.access !== "private";
+					const is_hangar = hangarOperators.includes(tags.operator);
 
-					if (p.name) {
-						lines.push(`# ${p.name}`);
-					} else if (p.bicycle_parking === "informal") {
+					if (tags.name) {
+						lines.push(`# ${tags.name}`);
+					} else if (tags.bicycle_parking === "informal") {
 						lines.push("# Informal bike parking");
 					} else if (is_hangar) {
 						lines.push("# Bike hangar");
-					} else if (p.location === "underground") {
-						lines.push("# Underground bike parking")
+					} else if (tags.location === "underground") {
+						lines.push("# Underground bike parking");
 					} else {
 						lines.push("# Bike parking");
 					}
 
-					if (p.bicycle_parking === "wall_loops") {
+					if (tags.bicycle_parking === "wall_loops") {
 						lines.push("**Wheel benders - not recommended for use**\n");
 					}
 
-					if (p.description) {
-						lines.push(`${p.description}`);
+					if (tags.description) {
+						lines.push(`${tags.description}`);
 					}
 
-					const access = accessMap[p.access];
+					const access = accessMap[tags.access];
 
 					if (access) {
-						const privateValue = privateMap[p.private];
+						const privateValue = privateMap[tags.private];
 
 						if (privateValue) {
 							addProp("Access", privateValue);
@@ -99,35 +100,35 @@ fs.writeFileSync(
 						}
 					}
 
-					if (p.fee === "yes") {
-						addProp("Fee", booleanise(p.fee));
+					if (tags.fee === "yes") {
+						addProp("Fee", booleanise(tags.fee));
 
-						if (p.charge) {
-							addProp("Cost", p.charge);
+						if (tags.charge) {
+							addProp("Cost", tags.charge);
 						}
 					}
 
 					if (
-						p.covered &&
-						!bicycleParkingImplicitCovered.includes(p.bicycle_parking)
+						tags.covered &&
+						!bicycleParkingImplicitCovered.includes(tags.bicycle_parking)
 					) {
-						addProp("Covered", booleanise(p.covered));
+						addProp("Covered", booleanise(tags.covered));
 					}
 
-					if (p.capacity) {
-						addProp("Capacity", p.capacity);
+					if (tags.capacity) {
+						addProp("Capacity", tags.capacity);
 					}
 
-					if (p.operator) {
-						addProp("Operated by", p.operator);
+					if (tags.operator) {
+						addProp("Operated by", tags.operator);
 					}
 
-					if (p.website) {
-						lines.push(`**[[${p.website}|Website]]**`);
+					if (tags.website) {
+						lines.push(`**[[${tags.website}|Website]]**`);
 					}
 
-					if (p.panoramax) {
-						const result = await getPanoramaxData(p.panoramax);
+					if (tags.panoramax) {
+						const result = await getPanoramaxData(tags.panoramax);
 
 						if (result) {
 							lines.push(`{{${result.thumbnailHref}}}`);
@@ -137,7 +138,9 @@ fs.writeFileSync(
 						}
 					}
 
-					lines.push(`[[https://mapcomplete.org/theme.html?z=18&lat=${lat}&lon=${lon}&userlayout=${encodeURIComponent(mapcompleteLayerUri)}#${type}/${id}|Edit]]`)
+					lines.push(
+						`[[https://mapcomplete.org/theme.html?z=18&lat=${lat}&lon=${lon}&userlayout=${encodeURIComponent(mapcompleteLayerUri)}#${type}/${id}|Edit]]`,
+					);
 
 					const text = lines.join("\n");
 
@@ -147,7 +150,7 @@ fs.writeFileSync(
 							type: "Point",
 							coordinates: [lon, lat],
 						},
-						properties: { access: p.access, text, is_hub, is_hangar },
+						properties: { access: tags.access, text, is_hub, is_hangar },
 					};
 				}),
 			)

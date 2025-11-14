@@ -66,6 +66,8 @@ fs.writeFileSync(
 						lines.push("# Informal bike parking");
 					} else if (is_hangar) {
 						lines.push("# Bike hangar");
+					} else if (p.location === "underground") {
+						lines.push("# Underground bike parking")
 					} else {
 						lines.push("# Bike parking");
 					}

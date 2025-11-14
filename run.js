@@ -1,5 +1,7 @@
 import fs from "fs";
 
+const mapcompleteLayerUri = 'https://studio.mapcomplete.org/12363857/layers/sheffield_cycle_parking/sheffield_cycle_parking.json'
+
 const overpassQuery = `
 [out:json][timeout:25];
 area(id:3600106956)->.searchArea;
@@ -49,7 +51,12 @@ fs.writeFileSync(
 		features: (
 			await Promise.all(
 				parking.elements.map(async (f) => {
+					const type = f.type
+					const id = f.id
 					const p = f.tags;
+
+					const { lat, lon } = f.center ?? f;
+
 					const lines = [];
 
 					function addProp(name, value) {
@@ -130,15 +137,15 @@ fs.writeFileSync(
 						}
 					}
 
+					lines.push(`[[https://mapcomplete.org/theme.html?z=18&lat=${lat}&lon=${lon}&userlayout=${encodeURIComponent(mapcompleteLayerUri)}#${type}/${id}|Edit]]`)
+
 					const text = lines.join("\n");
 
 					return {
 						type: "Feature",
 						geometry: {
 							type: "Point",
-							coordinates: f.center
-								? [f.center.lon, f.center.lat]
-								: [f.lon, f.lat],
+							coordinates: [lon, lat],
 						},
 						properties: { access: p.access, text, is_hub, is_hangar },
 					};

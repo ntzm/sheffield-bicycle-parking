@@ -133,7 +133,7 @@ fs.writeFileSync(
 						if (result) {
 							lines.push(`{{${result.thumbnailHref}}}`);
 							lines.push(
-								`Image is licensed by ${result.producers.join(", ")} under ${result.license}`,
+								`Image is licensed by ${result.producer} under ${result.license}`,
 							);
 						}
 					}
@@ -186,9 +186,7 @@ async function getPanoramaxData(id) {
 
 	const thumbnailHref = feature.assets.thumb.href;
 	const license = feature.properties.license;
-	const producers = feature.providers
-		.map((provider) => provider.name)
-		.toReversed();
+	const producer = feature.providers[feature.providers.length - 1].name
 
-	return { thumbnailHref, license, producers };
+	return { thumbnailHref, license, producer };
 }
